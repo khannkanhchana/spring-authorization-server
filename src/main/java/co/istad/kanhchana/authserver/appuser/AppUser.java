@@ -1,7 +1,5 @@
+
 package co.istad.kanhchana.authserver.appuser;
-
-
-
 
 import jakarta.persistence.*;
 
@@ -19,12 +17,16 @@ public class AppUser {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @Column(nullable = false, length = 255)
+    private String password;
+
     public AppUser() {
     }
 
-    public AppUser(String username, String email) {
+    public AppUser(String username, String email, String password) {
         this.username = username;
         this.email = email;
+        this.password = password;
     }
 
     public Long getId() {
@@ -39,6 +41,10 @@ public class AppUser {
         return email;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -50,5 +56,8 @@ public class AppUser {
     public void setEmail(String email) {
         this.email = email;
     }
-}
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
