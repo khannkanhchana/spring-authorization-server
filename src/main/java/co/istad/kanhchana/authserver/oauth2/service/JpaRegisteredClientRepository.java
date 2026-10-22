@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.UUID;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +48,7 @@ public class JpaRegisteredClientRepository
 
     @Override
     public void save(RegisteredClient registeredClient) {
+
         Client entity = clientRepository
                 .findById(registeredClient.getId())
                 .orElseGet(Client::new);
@@ -78,7 +79,8 @@ public class JpaRegisteredClientRepository
                 String.join(",", registeredClient.getRedirectUris()));
 
         entity.setPostLogoutRedirectUris(
-                String.join(",",
+                String.join(
+                        ",",
                         registeredClient.getPostLogoutRedirectUris()));
 
         entity.setScopes(
@@ -88,20 +90,23 @@ public class JpaRegisteredClientRepository
                 registeredClient.getClientSettings().getSettings()
                         .entrySet()
                         .stream()
-                        .map(e -> e.getKey() + "=" + e.getValue())
+                        .map(entry ->
+                                entry.getKey() + "=" + entry.getValue())
                         .collect(Collectors.joining(";")));
 
         entity.setTokenSettings(
                 registeredClient.getTokenSettings().getSettings()
                         .entrySet()
                         .stream()
-                        .map(e -> e.getKey() + "=" + e.getValue())
+                        .map(entry ->
+                                entry.getKey() + "=" + entry.getValue())
                         .collect(Collectors.joining(";")));
 
         clientRepository.save(entity);
     }
 
     private RegisteredClient toRegisteredClient(Client entity) {
+
         RegisteredClient.Builder builder = RegisteredClient
                 .withId(entity.getId())
                 .clientId(entity.getClientId())
@@ -121,12 +126,14 @@ public class JpaRegisteredClientRepository
         }
 
         split(entity.getClientAuthenticationMethods())
-                .forEach(value -> builder.clientAuthenticationMethod(
-                        new ClientAuthenticationMethod(value)));
+                .forEach(value ->
+                        builder.clientAuthenticationMethod(
+                                new ClientAuthenticationMethod(value)));
 
         split(entity.getAuthorizationGrantTypes())
-                .forEach(value -> builder.authorizationGrantType(
-                        new AuthorizationGrantType(value)));
+                .forEach(value ->
+                        builder.authorizationGrantType(
+                                new AuthorizationGrantType(value)));
 
         split(entity.getRedirectUris())
                 .forEach(builder::redirectUri);
@@ -137,24 +144,31 @@ public class JpaRegisteredClientRepository
         split(entity.getScopes())
                 .forEach(builder::scope);
 
-        builder.clientSettings(ClientSettings.builder().build());
+        // Must match DataInitializer.java
+        builder.clientSettings(
+                ClientSettings.builder()
+                        .requireAuthorizationConsent(true)
+                        .requireProofKey(true)
+                        .build());
 
-        builder.tokenSettings(TokenSettings.builder()
-                .accessTokenTimeToLive(Duration.ofMinutes(5))
-                .refreshTokenTimeToLive(Duration.ofHours(8))
-                .build());
+        builder.tokenSettings(
+                TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofMinutes(15))
+                        .refreshTokenTimeToLive(Duration.ofHours(8))
+                        .reuseRefreshTokens(false)
+                        .build());
 
         return builder.build();
     }
 
-    private static java.util.List<String> split(String value) {
+    private static List<String> split(String value) {
         if (value == null || value.isBlank()) {
-            return java.util.Collections.emptyList();
+            return Collections.emptyList();
         }
 
         return Arrays.stream(value.split(","))
                 .map(String::trim)
-                .filter(s -> !s.isEmpty())
+                .filter(item -> !item.isEmpty())
                 .toList();
     }
 }

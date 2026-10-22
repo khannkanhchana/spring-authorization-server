@@ -1,7 +1,7 @@
 
 package co.istad.kanhchana.authserver.config;
 
-
+import co.istad.kanhchana.authserver.user.User;
 import co.istad.kanhchana.authserver.user.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -28,43 +28,46 @@ public class DataInitializer {
         return args -> {
             String clientId = "postman-client";
 
-            if (registeredClientRepository.findByClientId(clientId) != null) {
-                return;
-            }
+            RegisteredClient existingClient =
+                    registeredClientRepository.findByClientId(clientId);
 
-            RegisteredClient client = RegisteredClient.withId(
-                            UUID.randomUUID().toString())
+            String registeredClientId = existingClient != null
+                    ? existingClient.getId()
+                    : UUID.randomUUID().toString();
+
+            RegisteredClient client = RegisteredClient
+                    .withId(registeredClientId)
                     .clientId(clientId)
                     .clientSecret(passwordEncoder.encode("secret"))
                     .clientName("Postman OAuth2 Client")
 
-                    // Client Authentication
+                    // Client authentication
                     .clientAuthenticationMethod(
                             ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 
-                    // OAuth2 Grant Types
+                    // OAuth2 grant types
                     .authorizationGrantType(
                             AuthorizationGrantType.AUTHORIZATION_CODE)
                     .authorizationGrantType(
                             AuthorizationGrantType.REFRESH_TOKEN)
 
-                    // Postman OAuth2 Callback URL
+                    // Postman callback URL
                     .redirectUri(
                             "https://oauth.pstmn.io/v1/callback")
 
-                    // OAuth2 Scopes
+                    // Scopes
                     .scope("openid")
                     .scope("profile")
                     .scope("read")
 
-                    // Client Settings
+                    // Client settings
                     .clientSettings(
                             ClientSettings.builder()
                                     .requireAuthorizationConsent(true)
                                     .requireProofKey(true)
                                     .build())
 
-                    // Token Settings
+                    // Token settings
                     .tokenSettings(
                             TokenSettings.builder()
                                     .accessTokenTimeToLive(
@@ -79,10 +82,9 @@ public class DataInitializer {
             registeredClientRepository.save(client);
 
             System.out.println(
-                    "OAuth2 Client initialized: " + clientId);
+                    "OAuth2 Client initialized/updated: " + clientId);
         };
     }
-
 
     @Bean
     public CommandLineRunner initializeDefaultUser(
@@ -93,21 +95,22 @@ public class DataInitializer {
             String username = "user";
 
             if (userRepository.existsByUsername(username)) {
+                System.out.println(
+                        "Default user already exists: " + username);
                 return;
             }
 
-            co.istad.kanhchana.authserver.user.User user =
-                    new co.istad.kanhchana.authserver.user.User(
-                            username,
-                            passwordEncoder.encode("1234"),
-                            "user@example.com",
-                            "USER"
-                    );
+            User user = new User(
+                    username,
+                    passwordEncoder.encode("1234"),
+                    "user@example.com",
+                    "USER"
+            );
 
             userRepository.save(user);
 
-            System.out.println("Default user created: " + username);
+            System.out.println(
+                    "Default user created: " + username);
         };
     }
-
 }
