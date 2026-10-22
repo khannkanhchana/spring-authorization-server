@@ -1,3 +1,4 @@
+
 package co.istad.kanhchana.authserver.oauth2.repository;
 
 import co.istad.kanhchana.authserver.oauth2.entity.Authorization;
@@ -25,7 +26,8 @@ public interface AuthorizationRepository
     Optional<Authorization> findByDeviceCodeValue(String value);
 
     @Query("""
-        SELECT a FROM Authorization a
+        SELECT a
+        FROM Authorization a
         WHERE a.state = :token
            OR a.authorizationCodeValue = :token
            OR a.accessTokenValue = :token

@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
-
 @Configuration
 public class JwkConfig {
 
@@ -44,7 +43,8 @@ public class JwkConfig {
 
     @Bean
     public JwtDecoder jwtDecoder(
-            JWKSource<SecurityContext> jwkSource) {
+            JWKSource<SecurityContext> jwkSource
+    ) {
         return OAuth2AuthorizationServerConfiguration
                 .jwtDecoder(jwkSource);
     }

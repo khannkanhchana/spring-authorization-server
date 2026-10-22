@@ -1,6 +1,7 @@
 
 package co.istad.kanhchana.authserver.config;
 
+
 import co.istad.kanhchana.authserver.user.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
