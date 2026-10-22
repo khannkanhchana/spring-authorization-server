@@ -1,29 +1,39 @@
 
 package co.istad.kanhchana.authserver.user;
 
+import co.istad.kanhchana.authserver.appuser.AppUser;
+import co.istad.kanhchana.authserver.appuser.AppUserRepository;
+
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final AppUserRepository appUserRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CustomUserDetailsService(AppUserRepository appUserRepository) {
+        this.appUserRepository = appUserRepository;
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        return userRepository.findByUsername(username)
+        AppUser appUser = appUserRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(
-                                "User not found: " + username));
+                                "User not found: " + username
+                        )
+                );
+
+        return User.withUsername(appUser.getUsername())
+                // Must already be encoded in the database
+                .password(appUser.getPassword())
+                .roles("USER")
+                .build();
     }
 }

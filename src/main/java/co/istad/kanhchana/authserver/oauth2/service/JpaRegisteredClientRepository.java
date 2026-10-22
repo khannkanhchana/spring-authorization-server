@@ -3,6 +3,7 @@ package co.istad.kanhchana.authserver.oauth2.service;
 
 import co.istad.kanhchana.authserver.oauth2.entity.Client;
 import co.istad.kanhchana.authserver.oauth2.repository.ClientRepository;
+
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -26,7 +27,8 @@ public class JpaRegisteredClientRepository
     private final ClientRepository clientRepository;
 
     public JpaRegisteredClientRepository(
-            ClientRepository clientRepository) {
+            ClientRepository clientRepository
+    ) {
         this.clientRepository = clientRepository;
     }
 
@@ -144,7 +146,7 @@ public class JpaRegisteredClientRepository
         split(entity.getScopes())
                 .forEach(builder::scope);
 
-        // Must match DataInitializer.java
+        // Keep these settings consistent with DataInitializer.
         builder.clientSettings(
                 ClientSettings.builder()
                         .requireAuthorizationConsent(true)
